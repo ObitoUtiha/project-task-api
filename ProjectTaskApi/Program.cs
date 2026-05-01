@@ -14,7 +14,14 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
                                                     options.UseNpgsql(
                                                       builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
 var app = builder.Build();
+
+using(var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
