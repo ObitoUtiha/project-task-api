@@ -12,6 +12,6 @@
 
         public DateTime? UpdatedAt { get; set; }
 
-
+        public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
     }
 }

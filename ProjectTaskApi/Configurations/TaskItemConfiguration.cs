@@ -26,6 +26,11 @@ namespace ProjectTaskApi.Configurations
                 .IsRequired();
 
             builder.Property(x => x.UpdatedAt);
+
+            builder.HasOne(x => x.Project)
+                            .WithMany(p => p.Tasks)
+                            .HasForeignKey(x => x.ProjectId)
+                            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

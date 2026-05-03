@@ -15,6 +15,8 @@
 
         public DateTime? UpdatedAt { get; set; }
 
+        public Guid ProjectId { get; set; }
 
+        public Project Project { get; set; } = null!;
     }
 }

@@ -8,7 +8,7 @@ namespace ProjectTaskApi.Configurations
     {
         public void Configure(EntityTypeBuilder<Project> builder)
         {
-            builder.ToTable("Project");
+            builder.ToTable("Projects");
 
             builder.HasKey(x => x.Id);
 
@@ -23,6 +23,7 @@ namespace ProjectTaskApi.Configurations
 
             builder.Property(x => x.UpdatedAt);
 
+            
 
         }
     }
