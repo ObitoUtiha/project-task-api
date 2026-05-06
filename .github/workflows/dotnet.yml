@@ -24,7 +24,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ProjectTaskApi/ProjectTaskApi.sln
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build ProjectTaskApi/ProjectTaskApi.sln --no-restore
