@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectTaskApi.Data;
+using ProjectTaskApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
                                                     options.UseNpgsql(
                                                       builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 var app = builder.Build();
 
