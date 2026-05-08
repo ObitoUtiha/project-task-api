@@ -7,5 +7,7 @@ namespace ProjectTaskApi.Services
             Task<List<ProjectGetDto>> GetProjectsAsync(
                 int page,
                 int pageSize);
+
+             Task<ProjectDetailsDto?> GetProjectDetails(Guid id);
         }
 }

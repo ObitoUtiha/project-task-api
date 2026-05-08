@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs;
+using ProjectTaskApi.DTOs.Tasks;
 
 namespace ProjectTaskApi.Services
 {
@@ -11,6 +12,33 @@ namespace ProjectTaskApi.Services
         public ProjectService(ApplicationContext context)
         {
             _context = context;
+        }
+
+        public async Task<ProjectDetailsDto?> GetProjectDetails(Guid id)
+        {
+            return await _context.Projects
+                .AsNoTracking()
+                .Where(x=>x.Id == id)
+                .Include(x => x.Tasks)
+                .Select(x => new ProjectDetailsDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt,
+                    Tasks = x.Tasks.Select(y=> new TaskGetDto
+                    {
+                        Id =y.Id,
+                        Title = y.Title,
+                        CreatedAt=y.CreatedAt,
+                        UpdatedAt=y.UpdatedAt,
+                        IsCompleted = y.IsCompleted,
+                        Description = y.Description
+                    }).ToList()
+
+                }).FirstOrDefaultAsync();
+
         }
 
         public async Task<List<ProjectGetDto>> GetProjectsAsync(int page, int pageSize)

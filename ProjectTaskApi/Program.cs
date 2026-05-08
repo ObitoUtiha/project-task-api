@@ -18,6 +18,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 builder.Services.AddScoped<IProjectService, ProjectService>();
 
+
 var app = builder.Build();
 
 using(var scope = app.Services.CreateScope())
