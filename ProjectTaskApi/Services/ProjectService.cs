@@ -2,6 +2,7 @@
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs;
 using ProjectTaskApi.DTOs.Tasks;
+using ProjectTaskApi.Entities;
 
 namespace ProjectTaskApi.Services
 {
@@ -12,6 +13,30 @@ namespace ProjectTaskApi.Services
         public ProjectService(ApplicationContext context)
         {
             _context = context;
+        }
+
+        public async Task<ProjectGetDto> CreateProjectAsync(CreateProjectDto project)
+        {
+            var newProject = new Project
+            {
+                Id = Guid.NewGuid(),
+                CreatedAt = DateTime.UtcNow,
+                Name = project.Name,
+                Description = project.Description
+            };
+
+            await _context.Projects.AddAsync(newProject);
+
+            await _context.SaveChangesAsync();
+
+            return new ProjectGetDto
+            {
+                Id = newProject.Id,
+                Name = newProject.Name,
+                Description = newProject.Description,
+                CreatedAt = newProject.CreatedAt,
+                UpdatedAt = newProject.UpdatedAt
+            };
         }
 
         public async Task<ProjectDetailsDto?> GetProjectDetails(Guid id)

@@ -9,5 +9,7 @@ namespace ProjectTaskApi.Services
                 int pageSize);
 
              Task<ProjectDetailsDto?> GetProjectDetails(Guid id);
-        }
+
+             Task<ProjectGetDto> CreateProjectAsync(CreateProjectDto project);
+    }
 }

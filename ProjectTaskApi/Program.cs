@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.Services;
+using FluentValidation;
+using ProjectTaskApi.DTOs.Validator;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +20,8 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 
 
 var app = builder.Build();

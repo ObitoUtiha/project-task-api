@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProjectTaskApi.DTOs;
 using ProjectTaskApi.Services;
 
 namespace ProjectTaskApi.Controllers
@@ -33,6 +34,17 @@ namespace ProjectTaskApi.Controllers
                 return NotFound();
             else
                 return Ok(project);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateProject(CreateProjectDto dto)
+        {
+            var createdProject = await _projectService.CreateProjectAsync(dto);
+
+            return CreatedAtAction(
+                nameof(GetProjectById),
+                new { id = createdProject.Id },
+                createdProject);
         }
     }
 }
