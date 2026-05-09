@@ -39,6 +39,19 @@ namespace ProjectTaskApi.Services
             };
         }
 
+        public async Task<bool> DeleteProjectAsync(Guid id)
+        {
+           var project =  await _context.Projects.Where(x=>x.Id == id).FirstOrDefaultAsync();
+
+            if(project == null)
+                return false;
+
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<ProjectDetailsDto?> GetProjectDetails(Guid id)
         {
             return await _context.Projects

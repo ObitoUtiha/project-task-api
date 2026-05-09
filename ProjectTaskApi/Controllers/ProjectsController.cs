@@ -30,7 +30,7 @@ namespace ProjectTaskApi.Controllers
             var project = await _projectService
                 .GetProjectDetails(id);
 
-            if(project == null)
+            if (project == null)
                 return NotFound();
             else
                 return Ok(project);
@@ -45,6 +45,15 @@ namespace ProjectTaskApi.Controllers
                 nameof(GetProjectById),
                 new { id = createdProject.Id },
                 createdProject);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProject(Guid id)
+        {
+            var result = await _projectService.DeleteProjectAsync(id);
+            if(!result)
+                return NotFound();
+            return NoContent();
         }
     }
 }

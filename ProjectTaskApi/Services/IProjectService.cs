@@ -11,5 +11,7 @@ namespace ProjectTaskApi.Services
              Task<ProjectDetailsDto?> GetProjectDetails(Guid id);
 
              Task<ProjectGetDto> CreateProjectAsync(CreateProjectDto project);
+
+             Task<bool> DeleteProjectAsync(Guid id);
     }
 }
