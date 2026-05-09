@@ -95,5 +95,20 @@ namespace ProjectTaskApi.Services
                  })
                  .ToListAsync();
         }
+
+        public async Task<bool> PutProjectAsync(CreateProjectDto project, Guid id)
+        {
+            var curProject = await _context.Projects.Where(x=>x.Id == id).FirstOrDefaultAsync();
+
+            if (curProject == null)
+                return false;
+            curProject.Name = project.Name;
+            curProject.Description = project.Description;
+            curProject.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

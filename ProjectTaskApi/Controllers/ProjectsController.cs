@@ -55,5 +55,14 @@ namespace ProjectTaskApi.Controllers
                 return NotFound();
             return NoContent();
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutProject(CreateProjectDto dto, Guid id)
+        {
+            var result = await _projectService.PutProjectAsync(dto, id);
+            if (!result)
+                return NotFound();
+            return NoContent();
+        }
     }
 }
