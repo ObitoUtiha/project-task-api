@@ -16,5 +16,7 @@ namespace ProjectTaskApi.DTOs.Tasks
 
         public DateTime? UpdatedAt { get; set; }
 
+        public Guid ProjectId { get; set; }
+
     }
 }
