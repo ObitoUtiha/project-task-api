@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs.Tasks;
+using ProjectTaskApi.Entities;
 
 namespace ProjectTaskApi.Services
 {
@@ -57,6 +58,42 @@ namespace ProjectTaskApi.Services
                 })
                 .ToListAsync();
 
+        }
+
+        public async Task<TaskGetDto?> PostTaskAsync(TaskCreateDto task)
+        {
+            var projectExists = await _context.Projects
+                  .AnyAsync(x => x.Id == task.ProjectId);
+
+            if (!projectExists)
+            {
+                return null;
+            }
+
+            var newTask = new TaskItem
+            {
+                Id = Guid.NewGuid(),
+                Description = task.Description,
+                CreatedAt = DateTime.UtcNow,
+                IsCompleted = task.IsCompleted,
+                Title = task.Title,
+                ProjectId = task.ProjectId
+            };
+
+            await _context.Tasks.AddAsync(newTask);
+
+            await _context.SaveChangesAsync();
+
+            return new TaskGetDto
+            {
+                Id = newTask.Id,
+                Description = newTask.Description,
+                CreatedAt = newTask.CreatedAt,
+                IsCompleted = newTask.IsCompleted,
+                Title = newTask.Title,
+                ProjectId = newTask.ProjectId,
+                UpdatedAt = newTask.UpdatedAt
+            };
         }
     }
 }

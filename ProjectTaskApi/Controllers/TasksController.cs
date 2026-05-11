@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProjectTaskApi.DTOs.Tasks;
 using ProjectTaskApi.Services;
 
 namespace ProjectTaskApi.Controllers
@@ -28,6 +29,18 @@ namespace ProjectTaskApi.Controllers
             if(task == null)
                 return NotFound();
             return Ok(task);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostTask(TaskCreateDto task)
+        {
+            var newTask = await _tasksService.PostTaskAsync(task);
+            if (newTask == null)
+                return BadRequest("Project does not exist");
+            return CreatedAtAction(
+                nameof(GetTaskById),
+                new { id = newTask.Id },
+                newTask);
         }
     }
 }
