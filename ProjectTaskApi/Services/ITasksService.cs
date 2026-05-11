@@ -1,4 +1,5 @@
-﻿using ProjectTaskApi.DTOs.Tasks;
+﻿using ProjectTaskApi.Common.Results;
+using ProjectTaskApi.DTOs.Tasks;
 
 namespace ProjectTaskApi.Services
 {
@@ -10,5 +11,7 @@ namespace ProjectTaskApi.Services
         Task<TaskGetDto?> GetTaskById (Guid id);
 
         Task<TaskGetDto?> PostTaskAsync(TaskCreateDto task);
+
+        Task<UpdateTaskResult> PutTaskAsync(TaskCreateDto task, Guid id);
     }
 }

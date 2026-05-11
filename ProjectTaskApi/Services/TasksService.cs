@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProjectTaskApi.Common.Results;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs.Tasks;
 using ProjectTaskApi.Entities;
@@ -94,6 +95,33 @@ namespace ProjectTaskApi.Services
                 ProjectId = newTask.ProjectId,
                 UpdatedAt = newTask.UpdatedAt
             };
+        }
+
+        public async Task<UpdateTaskResult> PutTaskAsync(TaskCreateDto task, Guid id)
+        {
+            var currentTask = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (currentTask == null)
+                return UpdateTaskResult.TaskNotFound;
+
+
+            var projectExists = await _context.Projects
+                .AnyAsync(x => x.Id == task.ProjectId);
+
+            if (!projectExists)
+               return UpdateTaskResult.ProjectNotFound;
+            
+
+            currentTask.Title = task.Title;
+            currentTask.Description = task.Description;
+            currentTask.IsCompleted = task.IsCompleted;
+            currentTask.ProjectId = task.ProjectId;
+            currentTask.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return UpdateTaskResult.Success;
+
         }
     }
 }

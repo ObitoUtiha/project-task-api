@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProjectTaskApi.Common.Results;
 using ProjectTaskApi.DTOs.Tasks;
 using ProjectTaskApi.Services;
 
@@ -41,6 +42,26 @@ namespace ProjectTaskApi.Controllers
                 nameof(GetTaskById),
                 new { id = newTask.Id },
                 newTask);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutTask(Guid id, TaskCreateDto dto)
+        {
+            var result = await _tasksService.PutTaskAsync(dto, id);
+
+            return result switch
+            {
+                UpdateTaskResult.TaskNotFound =>
+                    NotFound("Task not found"),
+
+                UpdateTaskResult.ProjectNotFound =>
+                    BadRequest("Project does not exist"),
+
+                UpdateTaskResult.Success =>
+                    NoContent(),
+
+                _ => StatusCode(500)
+            };
         }
     }
 }
