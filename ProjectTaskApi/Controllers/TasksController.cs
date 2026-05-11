@@ -63,5 +63,15 @@ namespace ProjectTaskApi.Controllers
                 _ => StatusCode(500)
             };
         }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(Guid id)
+        {
+            var result = await _tasksService.DeleteTaskAsync(id);
+            if (!result)
+                return NotFound();
+            return NoContent();
+        }
     }
 }

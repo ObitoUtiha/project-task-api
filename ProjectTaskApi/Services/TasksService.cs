@@ -15,6 +15,19 @@ namespace ProjectTaskApi.Services
             _context = context;
         }
 
+        public async Task<bool> DeleteTaskAsync(Guid id)
+        {
+            var task = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (task == null)
+                return false;
+
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<TaskGetDto?> GetTaskById(Guid id)
         {
             return await _context.Tasks

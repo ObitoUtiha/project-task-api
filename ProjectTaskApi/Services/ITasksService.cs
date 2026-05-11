@@ -13,5 +13,7 @@ namespace ProjectTaskApi.Services
         Task<TaskGetDto?> PostTaskAsync(TaskCreateDto task);
 
         Task<UpdateTaskResult> PutTaskAsync(TaskCreateDto task, Guid id);
+
+        Task<bool> DeleteTaskAsync(Guid id);
     }
 }
