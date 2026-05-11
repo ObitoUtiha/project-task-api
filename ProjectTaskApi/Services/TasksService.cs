@@ -13,6 +13,23 @@ namespace ProjectTaskApi.Services
             _context = context;
         }
 
+        public async Task<TaskGetDto?> GetTaskById(Guid id)
+        {
+            return await _context.Tasks
+                .AsNoTracking()
+                .Where(x => x.Id == id)
+                .Select(x => new TaskGetDto
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    CreatedAt = x.CreatedAt,
+                    IsCompleted = x.IsCompleted,
+                    Description = x.Description,
+                    UpdatedAt = x.UpdatedAt,
+                    ProjectId = x.ProjectId
+                }).FirstOrDefaultAsync();
+        }
+
         public async Task<List<TaskGetDto>> GetTasksAsync(bool? status, Guid? projectId)
         {
             var query = _context.Tasks.AsNoTracking().AsQueryable();

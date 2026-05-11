@@ -20,5 +20,14 @@ namespace ProjectTaskApi.Controllers
             var tasks = await _tasksService.GetTasksAsync(status, projectId);
             return Ok(tasks);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTaskById(Guid id)
+        {
+            var task = await _tasksService.GetTaskById(id);
+            if(task == null)
+                return NotFound();
+            return Ok(task);
+        }
     }
 }

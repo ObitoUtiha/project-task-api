@@ -6,5 +6,7 @@ namespace ProjectTaskApi.Services
     {
         Task<List<TaskGetDto>> GetTasksAsync(
             bool? status, Guid? projectId);
+
+        Task<TaskGetDto?> GetTaskById (Guid id);
     }
 }
