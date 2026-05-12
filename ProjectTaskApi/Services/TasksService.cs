@@ -22,10 +22,19 @@ namespace ProjectTaskApi.Services
             var task = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
 
             if (task == null)
+            {
+                _logger.LogWarning(
+                        "Task with id {TaskId} not found",
+                        id);
                 return false;
+            }
 
             _context.Tasks.Remove(task);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                    "Task with id {TaskId} deleted",
+                    id);
 
             return true;
         }
@@ -83,6 +92,9 @@ namespace ProjectTaskApi.Services
 
             if (!projectExists)
             {
+                _logger.LogWarning(
+                        "Project with id {ProjectId} not found",
+                        task.ProjectId);
                 return null;
             }
 
@@ -99,6 +111,10 @@ namespace ProjectTaskApi.Services
             await _context.Tasks.AddAsync(newTask);
 
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                    "Task with id {TaskId} created",
+                    newTask.Id);
 
             return new TaskGetDto
             {
@@ -117,14 +133,24 @@ namespace ProjectTaskApi.Services
             var currentTask = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
 
             if (currentTask == null)
+            {
+                _logger.LogWarning(
+                        "Task with id {TaskId} not found",
+                        id);
                 return UpdateTaskResult.TaskNotFound;
+            }
 
 
             var projectExists = await _context.Projects
                 .AnyAsync(x => x.Id == task.ProjectId);
 
             if (!projectExists)
-               return UpdateTaskResult.ProjectNotFound;
+            {
+                _logger.LogWarning(
+                        "Project with id {ProjectId} not found",
+                        task.ProjectId);
+                return UpdateTaskResult.ProjectNotFound;
+            }
             
 
             currentTask.Title = task.Title;
@@ -134,6 +160,10 @@ namespace ProjectTaskApi.Services
             currentTask.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                    "Task with id {TaskId} changed",
+                    id);
 
             return UpdateTaskResult.Success;
 
