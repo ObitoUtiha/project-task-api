@@ -31,6 +31,10 @@ namespace ProjectTaskApi.Services
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation(
+                "Project created with id {ProjectId}",
+                newProject.Id);
+
             return new ProjectGetDto
             {
                 Id = newProject.Id,
@@ -46,10 +50,19 @@ namespace ProjectTaskApi.Services
            var project =  await _context.Projects.Where(x=>x.Id == id).FirstOrDefaultAsync();
 
             if(project == null)
+            {
+                _logger.LogWarning(
+                    "Project with id {ProjectId} not found",
+                    id);
                 return false;
+            }    
 
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                    "Project deleted with id {ProjectId}",
+                    id);
 
             return true;
         }
@@ -103,12 +116,21 @@ namespace ProjectTaskApi.Services
             var curProject = await _context.Projects.Where(x=>x.Id == id).FirstOrDefaultAsync();
 
             if (curProject == null)
+            {
+                _logger.LogWarning(
+                        "Project with id {ProjectId} not found",
+                        id);
                 return false;
+            }
             curProject.Name = project.Name;
             curProject.Description = project.Description;
             curProject.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                    "Project with id {ProjectId} changed",
+                    id);
 
             return true;
         }
