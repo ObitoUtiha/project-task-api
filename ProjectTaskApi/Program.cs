@@ -20,7 +20,9 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
 
