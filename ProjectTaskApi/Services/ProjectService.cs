@@ -9,10 +9,12 @@ namespace ProjectTaskApi.Services
     public class ProjectService : IProjectService
     {
         private readonly ApplicationContext _context;
+        private readonly ILogger<ProjectService> _logger;
 
-        public ProjectService(ApplicationContext context)
+        public ProjectService(ApplicationContext context, ILogger<ProjectService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<ProjectGetDto> CreateProjectAsync(CreateProjectDto project)

@@ -9,10 +9,12 @@ namespace ProjectTaskApi.Services
     public class TasksService : ITasksService
     {
         private readonly ApplicationContext _context;
+        private readonly ILogger<TasksService> _logger;
 
-        public TasksService(ApplicationContext context)
+        public TasksService(ApplicationContext context, ILogger<TasksService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<bool> DeleteTaskAsync(Guid id)
