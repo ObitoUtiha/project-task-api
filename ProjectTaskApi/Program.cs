@@ -1,9 +1,11 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProjectTaskApi.Data;
-using ProjectTaskApi.Services;
-using FluentValidation;
 using ProjectTaskApi.DTOs.Validator;
+using ProjectTaskApi.Services;
+using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Host.UseSerilog(
+    (context, configuration) =>
+    {
+        configuration.ReadFrom.Configuration(
+            context.Configuration);
+    });
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
                                                     options.UseNpgsql(

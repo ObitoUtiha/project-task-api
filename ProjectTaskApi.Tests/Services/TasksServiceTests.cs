@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using ProjectTaskApi.Common.Results;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs.Tasks;
@@ -18,6 +20,8 @@ namespace ProjectTaskApi.Tests.Services
 
         private readonly TasksService _tasksService;
 
+
+
         public TasksServiceTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationContext>()
@@ -26,7 +30,10 @@ namespace ProjectTaskApi.Tests.Services
 
             _context = new ApplicationContext(options);
 
-            _tasksService = new TasksService(_context);
+
+            var loggerMock = new Mock<ILogger<TasksService>>();
+
+            _tasksService = new TasksService(_context, loggerMock.Object);
         }
 
         [Fact]

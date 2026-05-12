@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs;
 using ProjectTaskApi.Entities;
@@ -25,7 +27,9 @@ namespace ProjectTaskApi.Tests.Services
 
             _context = new ApplicationContext(options);
 
-            _projectService = new ProjectService(_context);
+            var loggerMock = new Mock<ILogger<ProjectService>>();
+
+            _projectService = new ProjectService(_context, loggerMock.Object);
         }
 
         [Fact]
