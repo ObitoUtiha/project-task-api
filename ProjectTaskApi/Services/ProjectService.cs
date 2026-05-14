@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs;
 using ProjectTaskApi.DTOs.Tasks;
 using ProjectTaskApi.Entities;
+using System.Text.Json;
 
 namespace ProjectTaskApi.Services
 {
@@ -10,11 +13,13 @@ namespace ProjectTaskApi.Services
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<ProjectService> _logger;
+        private readonly IDistributedCache _cache;
 
-        public ProjectService(ApplicationContext context, ILogger<ProjectService> logger)
+        public ProjectService(ApplicationContext context, ILogger<ProjectService> logger, IDistributedCache cache)
         {
             _context = context;
             _logger = logger;
+            _cache = cache;
         }
 
         public async Task<ProjectGetDto> CreateProjectAsync(CreateProjectDto project)
@@ -96,7 +101,16 @@ namespace ProjectTaskApi.Services
 
         public async Task<List<ProjectGetDto>> GetProjectsAsync(int page, int pageSize)
         {
-            return await _context.Projects
+            var cacheKey = $"projects_{page}_{pageSize}";
+
+            var cachedProjects = await _cache.GetStringAsync(cacheKey);
+
+            if (cachedProjects != null)
+            {
+                return JsonSerializer.Deserialize<List<ProjectGetDto>>(cachedProjects)!;
+            }
+
+            var projects = await _context.Projects
                  .AsNoTracking()
                  .Skip((page - 1) * pageSize)
                  .Take(pageSize)
@@ -109,6 +123,15 @@ namespace ProjectTaskApi.Services
                      UpdatedAt = x.UpdatedAt
                  })
                  .ToListAsync();
+
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(projects),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow =
+                            TimeSpan.FromMinutes(5)
+                    });
+
+            return projects;
         }
 
         public async Task<bool> PutProjectAsync(CreateProjectDto project, Guid id)
