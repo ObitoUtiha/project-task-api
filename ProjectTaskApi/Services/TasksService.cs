@@ -1,8 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using ProjectTaskApi.Common.Results;
 using ProjectTaskApi.Data;
+using ProjectTaskApi.DTOs;
 using ProjectTaskApi.DTOs.Tasks;
 using ProjectTaskApi.Entities;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ProjectTaskApi.Services
 {
@@ -10,11 +15,14 @@ namespace ProjectTaskApi.Services
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<TasksService> _logger;
+        private readonly IDistributedCache _cache;
 
-        public TasksService(ApplicationContext context, ILogger<TasksService> logger)
+
+        public TasksService(ApplicationContext context, ILogger<TasksService> logger, IDistributedCache cache)
         {
             _context = context;
             _logger = logger;
+            _cache = cache;
         }
 
         public async Task<bool> DeleteTaskAsync(Guid id)
@@ -30,7 +38,10 @@ namespace ProjectTaskApi.Services
             }
 
             _context.Tasks.Remove(task);
+
             await _context.SaveChangesAsync();
+
+            await _cache.RemoveAsync($"task_{id}");
 
             _logger.LogInformation(
                     "Task with id {TaskId} deleted",
@@ -41,7 +52,17 @@ namespace ProjectTaskApi.Services
 
         public async Task<TaskGetDto?> GetTaskById(Guid id)
         {
-            return await _context.Tasks
+
+            var cacheKey = $"task_{id}";
+
+            var cachedTask = await _cache.GetStringAsync(cacheKey);
+
+            if (cachedTask != null)
+            {
+                return JsonSerializer.Deserialize<TaskGetDto>(cachedTask)!;
+            }
+
+            var task =  await _context.Tasks
                 .AsNoTracking()
                 .Where(x => x.Id == id)
                 .Select(x => new TaskGetDto
@@ -54,10 +75,33 @@ namespace ProjectTaskApi.Services
                     UpdatedAt = x.UpdatedAt,
                     ProjectId = x.ProjectId
                 }).FirstOrDefaultAsync();
+
+            if (task is null)
+            {
+                return null;
+            }
+
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(task),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow =
+                            TimeSpan.FromMinutes(5)
+                    });
+
+            return task;
         }
 
         public async Task<List<TaskGetDto>> GetTasksAsync(bool? status, Guid? projectId)
         {
+            var cacheKey = $"tasks_{status}_{projectId}";
+
+            var cachedTasks = await _cache.GetStringAsync(cacheKey);
+
+            if (cachedTasks is not null)
+            {
+                return JsonSerializer.Deserialize<List<TaskGetDto>>(cachedTasks)!;
+            }
+
             var query = _context.Tasks.AsNoTracking().AsQueryable();
 
             if (status.HasValue)
@@ -70,7 +114,7 @@ namespace ProjectTaskApi.Services
                 query = query.Where(x => x.ProjectId == projectId.Value);
             }
 
-            return await query
+            var tasks =  await query
                 .Select(x => new TaskGetDto
                 {
                     Id = x.Id,
@@ -83,6 +127,14 @@ namespace ProjectTaskApi.Services
                 })
                 .ToListAsync();
 
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(tasks),
+                        new DistributedCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow =
+                                TimeSpan.FromMinutes(5)
+                        });
+
+            return tasks;
         }
 
         public async Task<TaskGetDto?> PostTaskAsync(TaskCreateDto task)
@@ -160,6 +212,8 @@ namespace ProjectTaskApi.Services
             currentTask.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            await _cache.RemoveAsync($"task_{id}");
 
             _logger.LogInformation(
                     "Task with id {TaskId} changed",

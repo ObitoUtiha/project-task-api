@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTaskApi.Common.Results;
@@ -33,7 +34,9 @@ namespace ProjectTaskApi.Tests.Services
 
             var loggerMock = new Mock<ILogger<TasksService>>();
 
-            _tasksService = new TasksService(_context, loggerMock.Object);
+            var cacheMock = new Mock<IDistributedCache>();
+
+            _tasksService = new TasksService(_context, loggerMock.Object, cacheMock.Object);
         }
 
         [Fact]
