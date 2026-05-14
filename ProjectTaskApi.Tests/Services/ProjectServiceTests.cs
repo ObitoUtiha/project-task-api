@@ -32,7 +32,10 @@ namespace ProjectTaskApi.Tests.Services
 
             var cacheMock = new Mock<IDistributedCache>();
 
-            _projectService = new ProjectService(_context, loggerMock.Object, cacheMock.Object);
+            cacheMock.Setup(x => x.GetAsync(It.IsAny<string>(),It.IsAny<CancellationToken>()))
+                .ReturnsAsync((byte[]?)null);
+
+            _projectService = new ProjectService(_context,loggerMock.Object,cacheMock.Object);
         }
 
         [Fact]
@@ -146,6 +149,41 @@ namespace ProjectTaskApi.Tests.Services
             Assert.Equal(dto.Name, updatedProject.Name);
 
             Assert.Equal(dto.Description, updatedProject.Description);
+        }
+
+        [Fact]
+        public async Task GetProjectsAsync_ShouldReturnPaginatedProjects()
+        {
+            // Arrange
+
+            var projects = new List<Project>();
+
+            for (int i = 1; i <= 15; i++)
+            {
+                projects.Add(new Project
+                {
+                    Id = Guid.NewGuid(),
+                    Name = $"Project {i}",
+                    Description = $"Description {i}",
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.Projects.AddRangeAsync(projects);
+
+            await _context.SaveChangesAsync();
+
+            // Act
+
+            var result = await _projectService.GetProjectsAsync(page: 2, pageSize: 5);
+
+            // Assert
+
+            Assert.Equal(5, result.Count);
+
+            Assert.Equal("Project 6", result[0].Name);
+
+            Assert.Equal("Project 10", result[^1].Name);
         }
     }
 }
