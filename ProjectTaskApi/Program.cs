@@ -38,6 +38,14 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration =
+        builder.Configuration["Redis"];
+
+    options.InstanceName = "ProjectTaskApi";
+});
+
 var app = builder.Build();
 
 using(var scope = app.Services.CreateScope())
@@ -54,9 +62,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthorization();
-
 app.UseExceptionHandler();
+
+app.UseAuthorization();
 
 app.MapControllers();
 
