@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using ProjectTaskApi.Common.Exceptions;
 using ProjectTaskApi.Data;
 using ProjectTaskApi.DTOs.Validator;
 using ProjectTaskApi.Services;
@@ -34,6 +35,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -52,6 +55,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+
+app.UseExceptionHandler();
 
 app.MapControllers();
 
