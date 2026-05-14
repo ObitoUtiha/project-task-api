@@ -36,6 +36,10 @@ namespace ProjectTaskApi.Tests.Services
 
             var cacheMock = new Mock<IDistributedCache>();
 
+            cacheMock.Setup(x => x.GetAsync(It.IsAny<string>(),It.IsAny<CancellationToken>()))
+                .ReturnsAsync((byte[]?)null);
+
+
             _tasksService = new TasksService(_context, loggerMock.Object, cacheMock.Object);
         }
 
@@ -179,6 +183,76 @@ namespace ProjectTaskApi.Tests.Services
             Assert.Equal(dto.Description, updatedTask.Description);
 
             Assert.Equal(dto.IsCompleted, updatedTask.IsCompleted);
+        }
+
+        [Fact]
+        public async Task GetTasksAsync_ShouldFilterByStatusAndProjectId()
+        {
+            // Arrange
+
+            var project1 = new Project
+            {
+                Id = Guid.NewGuid(),
+                Name = "Project 1",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var project2 = new Project
+            {
+                Id = Guid.NewGuid(),
+                Name = "Project 2",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.Projects.AddRangeAsync(project1, project2);
+
+            var tasks = new List<TaskItem>
+            {
+                new TaskItem
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Task 1",
+                    IsCompleted = true,
+                    ProjectId = project1.Id,
+                    CreatedAt = DateTime.UtcNow
+                },
+
+                new TaskItem
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Task 2",
+                    IsCompleted = false,
+                    ProjectId = project1.Id,
+                    CreatedAt = DateTime.UtcNow
+                },
+
+                new TaskItem
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Task 3",
+                    IsCompleted = true,
+                    ProjectId = project2.Id,
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            await _context.Tasks.AddRangeAsync(tasks);
+
+            await _context.SaveChangesAsync();
+
+            // Act
+
+            var result = await _tasksService.GetTasksAsync(true, project1.Id);
+
+            // Assert
+
+            Assert.Single(result);
+
+            Assert.Equal("Task 1", result[0].Title);
+
+            Assert.True(result[0].IsCompleted);
+
+            Assert.Equal(project1.Id, result[0].ProjectId);
         }
     }
 }

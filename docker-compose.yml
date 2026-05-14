@@ -1,21 +1,42 @@
-
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: project-task-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=project_task_db;Username=postgres;Password=111
+      - Redis=redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   postgres:
     image: postgres:16
-
+    container_name: postgres-db
     ports:
-      - "5438:5432"
+      - "5438:5432" 
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 111
       POSTGRES_DB: project_task_db
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d project_task_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - db_data:/var/lib/postgresql/data
+
   redis:
     image: redis:latest
     container_name: redis-cache
     ports:
       - "6379:6379"
+
 volumes:
   db_data:
